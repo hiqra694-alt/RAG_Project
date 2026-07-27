@@ -1,0 +1,90 @@
+==================================================
+  RAG Pipeline - Step 1: Document Ingestion
+==================================================
+
+[*] Starting text extraction for 'nvidia_10k.pdf' (pages 35 to 50)...
+    -> Extracted 53,986 characters from 'nvidia_10k.pdf'.
+
+[*] Starting text extraction for 'attention_paper.pdf' (pages 1 to 15)...
+    -> Extracted 40,035 characters from 'attention_paper.pdf'.
+
+[*] Starting text extraction for 'nist_framework.pdf' (pages 10 to 25)...
+    -> Extracted 36,589 characters from 'nist_framework.pdf'.
+
+==================================================
+[+] Total number of documents successfully loaded into memory: 3
+==================================================
+
+==================================================
+  RAG Pipeline - Step 2: Document Chunking
+==================================================
+Total fixed-size chunks created: 162
+Total semantic chunks created:   1225
+
+--- Preview of First Fixed-Size Chunk ---
+ID: 0 | Source: 'nvidia_10k.pdf'
+Text Preview: "PROXY SUMMARY This summary highlights information contained elsewhere in the proxy statement. This s..."
+
+--- Preview of First Semantic Chunk ---
+ID: 0 | Source: 'nvidia_10k.pdf'
+Text Preview: "PROXY SUMMARY..."
+==================================================
+
+==================================================
+  RAG Pipeline - Step 3 & 4: Embeddings & Storage
+==================================================
+
+[*] Generating embeddings for 162 chunks in 'collection_fixed' using 'voyage-3-lite'...
+    -> Batch 1/7: Embedding 26 chunks (~3,900 words)...
+    -> Batch 2/7: Embedding 26 chunks (~3,900 words)...
+    -> Batch 3/7: Embedding 26 chunks (~3,892 words)...
+    -> Batch 4/7: Embedding 26 chunks (~3,900 words)...
+    [!] Rate limit encountered. Waiting 22s before retry (attempt 1/5)...
+    -> Batch 5/7: Embedding 27 chunks (~3,995 words)...
+    [!] Rate limit encountered. Waiting 22s before retry (attempt 1/5)...
+    -> Batch 6/7: Embedding 26 chunks (~3,900 words)...
+    [!] Rate limit encountered. Waiting 22s before retry (attempt 1/5)...
+    -> Batch 7/7: Embedding 5 chunks (~656 words)...
+[+] Embeddings generated successfully! Vector dimension: 512
+[*] Uploading 162 points to Qdrant collection 'collection_fixed'...
+[+] Successfully stored 162 vectors in collection 'collection_fixed'.
+
+[*] Generating embeddings for 1225 chunks in 'collection_semantic' using 'voyage-3-lite'...
+    -> Batch 1/5: Embedding 230 chunks (~3,915 words)...
+    [!] Rate limit encountered. Waiting 22s before retry (attempt 1/5)...
+    -> Batch 2/5: Embedding 164 chunks (~3,955 words)...
+    -> Batch 3/5: Embedding 156 chunks (~3,943 words)...
+    [!] Rate limit encountered. Waiting 22s before retry (attempt 1/5)...
+    -> Batch 4/5: Embedding 452 chunks (~3,959 words)...
+    -> Batch 5/5: Embedding 223 chunks (~3,601 words)...
+[+] Embeddings generated successfully! Vector dimension: 512
+[*] Uploading 1225 points to Qdrant collection 'collection_semantic'...
+[+] Successfully stored 1225 vectors in collection 'collection_semantic'.
+
+==================================================
+  Vector Storage Verification Summary
+==================================================
+[+] Total vectors stored in 'collection_fixed':    162
+[+] Total vectors stored in 'collection_semantic': 1225
+==================================================
+
+==================================================
+  RAG Pipeline - Step 5: Retrieval & Generation
+==================================================
+Query: "What are the main components of the Transformer architecture?"
+
+--- Retrieval: FIXED chunking (collection_fixed) ---
+  [1] score=0.6235 source=attention_paper.pdf | "symbol representations (x1, ..., xn) to a sequence of continuous representations z = (z1, ..., zn). ..."
+  [2] score=0.5725 source=attention_paper.pdf | "early when possible [38]. Table 2 summarizes our results and compares our translation quality and tr..."
+  [3] score=0.5551 source=attention_paper.pdf | "Provided proper attribution is provided, Google hereby grants permission to reproduce the tables and..."
+Traceback (most recent call last):
+  File "C:\RAG_Project\rag_pipeline.py", line 421, in <module>
+    run_rag_query(sample_query, top_k=5)
+    ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\RAG_Project\rag_pipeline.py", line 403, in run_rag_query
+    print(f"  [{i}] score={c['score']:.4f} source={c['source']} | \"{preview}...\"")
+    ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\SR LAPTOP\AppData\Local\Programs\Python\Python314\Lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec can't encode character '\u03b1' in position 124: character maps to <undefined>

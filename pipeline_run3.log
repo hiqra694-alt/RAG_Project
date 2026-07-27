@@ -1,0 +1,102 @@
+==================================================
+  RAG Pipeline - Step 1: Document Ingestion
+==================================================
+
+[*] Starting text extraction for 'nvidia_10k.pdf' (pages 35 to 50)...
+    -> Extracted 53,986 characters from 'nvidia_10k.pdf'.
+
+[*] Starting text extraction for 'attention_paper.pdf' (pages 1 to 15)...
+    -> Extracted 40,035 characters from 'attention_paper.pdf'.
+
+[*] Starting text extraction for 'nist_framework.pdf' (pages 10 to 25)...
+    -> Extracted 36,589 characters from 'nist_framework.pdf'.
+
+==================================================
+[+] Total number of documents successfully loaded into memory: 3
+==================================================
+
+==================================================
+  RAG Pipeline - Step 2: Document Chunking
+==================================================
+Total fixed-size chunks created: 162
+Total semantic chunks created:   146
+
+--- Preview of First Fixed-Size Chunk ---
+ID: 0 | Source: 'nvidia_10k.pdf'
+Text Preview: "PROXY SUMMARY This summary highlights information contained elsewhere in the proxy statement. This s..."
+
+--- Preview of First Semantic Chunk ---
+ID: 0 | Source: 'nvidia_10k.pdf'
+Text Preview: "PROXY SUMMARY This summary highlights information contained elsewhere in the proxy statement. This s..."
+==================================================
+
+==================================================
+  RAG Pipeline - Step 3 & 4: Embeddings & Storage
+==================================================
+
+[*] Generating embeddings for 162 chunks in 'collection_fixed' using 'voyage-3-lite'...
+    -> Batch 1/7: Embedding 26 chunks (~3,900 words)...
+    -> Batch 2/7: Embedding 26 chunks (~3,900 words)...
+    -> Batch 3/7: Embedding 26 chunks (~3,892 words)...
+    [!] Rate limit encountered. Waiting 22s before retry (attempt 1/5)...
+    -> Batch 4/7: Embedding 26 chunks (~3,900 words)...
+    -> Batch 5/7: Embedding 27 chunks (~3,995 words)...
+    [!] Rate limit encountered. Waiting 22s before retry (attempt 1/5)...
+    -> Batch 6/7: Embedding 26 chunks (~3,900 words)...
+    [!] Rate limit encountered. Waiting 22s before retry (attempt 1/5)...
+    -> Batch 7/7: Embedding 5 chunks (~656 words)...
+[+] Embeddings generated successfully! Vector dimension: 512
+[*] Uploading 162 points to Qdrant collection 'collection_fixed'...
+[+] Successfully stored 162 vectors in collection 'collection_fixed'.
+
+[*] Generating embeddings for 146 chunks in 'collection_semantic' using 'voyage-3-lite'...
+    -> Batch 1/7: Embedding 22 chunks (~3,867 words)...
+    [!] Rate limit encountered. Waiting 22s before retry (attempt 1/5)...
+    -> Batch 2/7: Embedding 23 chunks (~3,925 words)...
+    -> Batch 3/7: Embedding 24 chunks (~3,989 words)...
+    [!] Rate limit encountered. Waiting 22s before retry (attempt 1/5)...
+    -> Batch 4/7: Embedding 23 chunks (~3,904 words)...
+    -> Batch 5/7: Embedding 22 chunks (~3,995 words)...
+    [!] Rate limit encountered. Waiting 22s before retry (attempt 1/5)...
+    -> Batch 6/7: Embedding 24 chunks (~3,886 words)...
+    [!] Rate limit encountered. Waiting 22s before retry (attempt 1/5)...
+    -> Batch 7/7: Embedding 8 chunks (~1,527 words)...
+[+] Embeddings generated successfully! Vector dimension: 512
+[*] Uploading 146 points to Qdrant collection 'collection_semantic'...
+[+] Successfully stored 146 vectors in collection 'collection_semantic'.
+
+==================================================
+  Vector Storage Verification Summary
+==================================================
+[+] Total vectors stored in 'collection_fixed':    162
+[+] Total vectors stored in 'collection_semantic': 146
+==================================================
+
+==================================================
+  RAG Pipeline - Step 5: Retrieval & Generation
+==================================================
+Query: "What are the main components of the Transformer architecture?"
+
+--- Retrieval: FIXED chunking (collection_fixed) ---
+    [!] Rate limit encountered. Waiting 22s before retry (attempt 1/5)...
+  [1] score=0.6255 source=attention_paper.pdf | "symbol representations (x1, ..., xn) to a sequence of continuous representations z = (z1, ..., zn). ..."
+  [2] score=0.5729 source=attention_paper.pdf | "early when possible [38]. Table 2 summarizes our results and compares our translation quality and tr..."
+  [3] score=0.5570 source=attention_paper.pdf | "Provided proper attribution is provided, Google hereby grants permission to reproduce the tables and..."
+  [4] score=0.5506 source=attention_paper.pdf | "generate a sequence of hidden states ht, as a function of the previous hidden state ht−1 and the inp..."
+  [5] score=0.5495 source=attention_paper.pdf | "maximum output length to input length + 300. We used a beam size of 21 and α = 0.3 for both WSJ only..."
+
+--- Generation: FIXED chunking ---
+The main components of the Transformer architecture are stacked self-attention and point-wise, fully connected layers for both the encoder and decoder [1]. The encoder is composed of a stack of N = 6 identical layers, each with two sub-layers: a multi-head self-attention mechanism and a simple, position-wise fully connected feed-forward network [1].
+
+--- Retrieval: SEMANTIC chunking (collection_semantic) ---
+    [!] Rate limit encountered. Waiting 22s before retry (attempt 1/5)...
+  [1] score=0.6595 source=attention_paper.pdf | "Transformer - model architecture. The Transformer follows this overall architecture using stacked se..."
+  [2] score=0.6071 source=attention_paper.pdf | "compute representations of its input and output without using sequence- aligned RNNs or convolution...."
+  [3] score=0.5812 source=attention_paper.pdf | "models in various tasks, allowing modeling of dependencies without regard to their distance in the i..."
+  [4] score=0.5809 source=attention_paper.pdf | "Vaswani∗ Google Brain avaswani@google.com Noam Shazeer∗ Google Brain noam@google.com Niki Parmar∗ Go..."
+  [5] score=0.5570 source=attention_paper.pdf | "literature. We estimate the number of floating point operations used to train a model by multiplying..."
+
+--- Generation: SEMANTIC chunking ---
+The main components of the Transformer architecture are stacked self-attention and point-wise, fully connected layers for both the encoder and decoder [1, 2]. The encoder is composed of a stack of N = 6 identical layers, each with two sub-layers: a multi-head self-attention mechanism and a simple, position-wise fully connected feed-forward network [1]. The Transformer follows this overall architecture, as shown in Figure 1 [1, 2].
+
+==================================================
